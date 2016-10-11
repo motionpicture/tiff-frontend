@@ -1,0 +1,61 @@
+<html>
+<head>
+    <script src='https://pt01.mul-pay.jp/ext/js/token.js' ></script>
+</head>
+<body>
+    <!—カード情報トークン化フォーム -->
+    <form id='getTokenForm'>
+        <p>カード番号：<input type='text' value='4111111111111111' name='cardno' id='cardno' /> </p>
+        <p> カード有効期限：
+            <input type='text' value='2017' name='expire_year' id='expire_year' />/
+            <input type='text' value='01' name='expire_month' id='expire_month' />
+        </p>
+        <p>カード名義人：<input type='text' value='AA AA' name='holdername' id='holdername' /></p>
+        <p>セキュリティコード：<input type='text' value='111' name='securitycode' id='securitycode' /></p>
+        <p><input type='button' value='購入する' onclick='doPurchase()'/> </p>
+    </form>
+    <!— 加盟店購入フォーム-->
+    <form id='purchaseForm' action='/GMO/reserve/<%- token %>/execute' method='post'>
+        <p>
+        <input type='hidden' value='' name='kameitenn_chumon_bango' /> <!-- 加盟店での注文番号等、決済を特定できる情報 -->
+        <input type='hidden' value='' id='gmo_token' name='gmo_token' /> <!-- 取得したトークンを設定するプレースホルダ -->
+        </p>
+    </form>
+
+    <script type='text/javascript'>
+    function execPurchase(response) {
+        console.log('token got.', response);
+        if (response.resultCode != 000) {
+            window.alert( '購入処理中にエラーが発生しました' )
+        } else {
+            //カード情報は念のため値を除去
+            document.getElementById('cardno').value="";
+            document.getElementById('expire_year').value="";
+            document.getElementById('expire_month').value="";
+            document.getElementById('securitycode').value="";
+            //予め購入フォームに用意したtoken フィールドに、値を設定
+            document.getElementById('gmo_token').value = response.tokenObject.token;
+            //スクリプトからフォームをsubmit
+            document.getElementById('purchaseForm').submit();
+        }
+    }
+
+    function doPurchase() {
+        var cardno,expire,securitycode,holdername;
+        cardno = document.getElementById('cardno').value;
+        expire = document.getElementById('expire_year').value + document.getElementById('expire_month').value;
+        securitycode = document.getElementById('securitycode').value;
+        holdername = document.getElementById('holdername').value;
+        Multipayment.init("tshop00024743");
+        var params = {
+            cardno: cardno,
+            expire: expire,
+            securitycode: securitycode,
+            holdername: holdername
+        };
+        console.log('getting token...params:', params);
+        Multipayment.getToken(params, execPurchase);
+    }
+    </script>
+</body>
+</html>

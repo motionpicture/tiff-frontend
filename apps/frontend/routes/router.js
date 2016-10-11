@@ -19,6 +19,7 @@ exports.default = (app) => {
     app.get('/reserve/print', 'reserve.print', base, (req, res, next) => { (new ReserveController_1.default(req, res, next)).print(); });
     // GMOプロセス
     app.post('/GMO/reserve/:token/start', 'gmo.reserve.start', base, (req, res, next) => { (new GMOReserveController_1.default(req, res, next)).start(); });
+    app.post('/GMO/reserve/:token/execute', 'gmo.reserve.execute', base, (req, res, next) => { (new GMOReserveController_1.default(req, res, next)).execute(); });
     app.post('/GMO/reserve/result', 'gmo.reserve.result', base, (req, res, next) => { (new GMOReserveController_1.default(req, res, next)).result(); });
     app.get('/GMO/reserve/:paymentNo/cancel', 'gmo.reserve.cancel', base, (req, res, next) => { (new GMOReserveController_1.default(req, res, next)).cancel(); });
     app.post('/GMO/reserve/notify', 'gmo.reserve.notify', base, (req, res, next) => { (new GMOReserveController_1.default(req, res, next)).notify(); });

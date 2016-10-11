@@ -10,6 +10,7 @@ import GMONotificationResponseModel from '../../../models/Reserve/GMONotificatio
 import moment = require('moment');
 import conf = require('config');
 import querystring = require('querystring');
+import request = require('request');
 import GMOReserveCreditController from './Credit/GMOReserveCreditController';
 import GMOReserveCvsController from './Cvs/GMOReserveCvsController';
 
@@ -50,7 +51,7 @@ export default class GMOReserveController extends ReserveBaseController {
             if (err) return this.next(new Error(this.req.__('Message.Expired')));
 
             // 予約情報セッション削除
-            reservationModel.remove(() => {
+            // reservationModel.remove(() => {
                 // 予約プロセス固有のログファイルをセット
                 this.setProcessLogger(reservationModel.paymentNo, () => {
                     // GMOへ遷移画面
@@ -94,9 +95,72 @@ export default class GMOReserveController extends ReserveBaseController {
                     // GMOへの送信データをログに残すために、一度htmlを取得してからrender
                     this.res.render('gmo/reserve/start', (err, html) => {
                         this.logger.info('rendering gmo/reserve/start...html:', html);
-                        this.res.render('gmo/reserve/start');
+                        this.res.render('gmo/reserve/token', {layout: false, token: token});
                     });
                 });
+            // });
+        });
+    }
+
+    /**
+     * GMO決済を実行する
+     */
+    public execute(): void {
+        let token = this.req.params.token;
+        ReservationModel.find(token, (err, reservationModel) => {
+            if (err) return this.next(new Error(this.req.__('Message.Expired')));
+
+            let gmoToken = this.req.body.gmo_token;
+            let options: any;
+
+            // 取引登録
+            options = {
+                url: 'https://pt01.mul-pay.jp/payment/EntryTran.idPass',
+                form: {
+                    ShopID: conf.get<string>('gmo_payment_shop_id'),
+                    ShopPass: conf.get<string>('gmo_payment_shop_password'),
+                    OrderID: reservationModel.paymentNo,
+                    JobCd: GMOUtil.STATUS_CREDIT_CAPTURE,
+                    Amount: reservationModel.getTotalCharge()
+                }
+            };
+            this.logger.info('requesting... options:', options);
+            request.post(options, (error, response, body) => {
+                this.logger.info('request processed.', error, body);
+                if (error) return this.next(error);
+                if (response.statusCode !== 200) return this.next(new Error(body));
+
+                let entryTranResult = querystring.parse(body);
+                if (entryTranResult['ErrCode']) return this.next(new Error(body));
+
+                // 決済実行
+                options = {
+                    url: 'https://pt01.mul-pay.jp/payment/ExecTran.idPass',
+                    form: {
+                        AccessID: entryTranResult.AccessID,
+                        AccessPass: entryTranResult.AccessPass,
+                        ShopID: conf.get<string>('gmo_payment_shop_id'),
+                        ShopPass: conf.get<string>('gmo_payment_shop_password'),
+                        OrderID: reservationModel.paymentNo,
+                        JobCd: GMOUtil.STATUS_CREDIT_CAPTURE,
+                        Amount: reservationModel.getTotalCharge().toString(),
+                        Method: '1', // 一括
+                        PayTimes: 1, // 支払回数
+                        Token: gmoToken
+                    }
+                };
+                this.logger.info('requesting... options:', options);
+                request.post(options, (error, response, body) => {
+                    this.logger.info('request processed.', error, body);
+                    if (error) return this.next(error);
+                    if (response.statusCode !== 200) return this.next(new Error(body));
+
+                    let execTranResult = querystring.parse(body);
+                    if (execTranResult['ErrCode']) return this.next(new Error(body));
+
+                    this.res.send(execTranResult.OrderID);
+                });
+
             });
         });
     }

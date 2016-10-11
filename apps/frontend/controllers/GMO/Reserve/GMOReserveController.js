@@ -11,6 +11,7 @@ const GMONotificationResponseModel_1 = require('../../../models/Reserve/GMONotif
 const moment = require('moment');
 const conf = require('config');
 const querystring = require('querystring');
+const request = require('request');
 const GMOReserveCreditController_1 = require('./Credit/GMOReserveCreditController');
 const GMOReserveCvsController_1 = require('./Cvs/GMOReserveCvsController');
 /**
@@ -46,41 +47,103 @@ class GMOReserveController extends ReserveBaseController_1.default {
             if (err)
                 return this.next(new Error(this.req.__('Message.Expired')));
             // 予約情報セッション削除
-            reservationModel.remove(() => {
-                // 予約プロセス固有のログファイルをセット
-                this.setProcessLogger(reservationModel.paymentNo, () => {
-                    // GMOへ遷移画面
-                    // 作品名から、特定文字以外を取り除く
-                    let filmNameFullWidth = Util_1.default.toFullWidth(reservationModel.performance.film.name.ja);
-                    let filmNameFullWidthLength = filmNameFullWidth.length;
-                    let registerDisp1 = '';
-                    for (let i = 0; i < filmNameFullWidthLength; i++) {
-                        let letter = filmNameFullWidth[i];
-                        if (letter.match(/[Ａ-Ｚａ-ｚ０-９]/) // 全角英数字
-                            || letter.match(/[\u3040-\u309F]/) // ひらがな
-                            || letter.match(/[\u30A0-\u30FF]/) // カタカナ
-                            || letter.match(/[一-龠]/) // 漢字
-                        ) {
-                            registerDisp1 += letter;
-                        }
+            // reservationModel.remove(() => {
+            // 予約プロセス固有のログファイルをセット
+            this.setProcessLogger(reservationModel.paymentNo, () => {
+                // GMOへ遷移画面
+                // 作品名から、特定文字以外を取り除く
+                let filmNameFullWidth = Util_1.default.toFullWidth(reservationModel.performance.film.name.ja);
+                let filmNameFullWidthLength = filmNameFullWidth.length;
+                let registerDisp1 = '';
+                for (let i = 0; i < filmNameFullWidthLength; i++) {
+                    let letter = filmNameFullWidth[i];
+                    if (letter.match(/[Ａ-Ｚａ-ｚ０-９]/) // 全角英数字
+                        || letter.match(/[\u3040-\u309F]/) // ひらがな
+                        || letter.match(/[\u30A0-\u30FF]/) // カタカナ
+                        || letter.match(/[一-龠]/) // 漢字
+                    ) {
+                        registerDisp1 += letter;
                     }
-                    this.res.locals.registerDisp1 = registerDisp1['mbSubstr'](0, 32);
-                    this.res.locals.registerDisp2 = Util_1.default.toFullWidth(`${reservationModel.performance.day.substr(0, 4)}／${reservationModel.performance.day.substr(4, 2)}／${reservationModel.performance.day.substr(6)}`);
-                    this.res.locals.registerDisp3 = Util_1.default.toFullWidth(reservationModel.performance.theater.name.ja);
-                    this.res.locals.registerDisp4 = Util_1.default.toFullWidth(`開場${reservationModel.performance.open_time.substr(0, 2)}:${reservationModel.performance.open_time.substr(2)}　開演${reservationModel.performance.start_time.substr(0, 2)}:${reservationModel.performance.start_time.substr(2)}`);
-                    this.res.locals.shopId = conf.get('gmo_payment_shop_id');
-                    this.res.locals.orderID = reservationModel.paymentNo; // 27桁まで(購入番号を使用)
-                    this.res.locals.amount = reservationModel.getTotalCharge().toString();
-                    this.res.locals.dateTime = moment(reservationModel.purchasedAt).format('YYYYMMDDHHmmss');
-                    this.res.locals.useCredit = (reservationModel.paymentMethod === GMOUtil_1.default.PAY_TYPE_CREDIT) ? '1' : '0';
-                    this.res.locals.useCvs = (reservationModel.paymentMethod === GMOUtil_1.default.PAY_TYPE_CVS) ? '1' : '0';
-                    this.res.locals.shopPassString = GMOUtil_1.default.createShopPassString(conf.get('gmo_payment_shop_id'), this.res.locals.orderID, this.res.locals.amount, conf.get('gmo_payment_shop_password'), this.res.locals.dateTime);
-                    this.logger.info('redirecting to GMO payment...');
-                    // GMOへの送信データをログに残すために、一度htmlを取得してからrender
-                    this.res.render('gmo/reserve/start', (err, html) => {
-                        this.logger.info('rendering gmo/reserve/start...html:', html);
-                        this.res.render('gmo/reserve/start');
-                    });
+                }
+                this.res.locals.registerDisp1 = registerDisp1['mbSubstr'](0, 32);
+                this.res.locals.registerDisp2 = Util_1.default.toFullWidth(`${reservationModel.performance.day.substr(0, 4)}／${reservationModel.performance.day.substr(4, 2)}／${reservationModel.performance.day.substr(6)}`);
+                this.res.locals.registerDisp3 = Util_1.default.toFullWidth(reservationModel.performance.theater.name.ja);
+                this.res.locals.registerDisp4 = Util_1.default.toFullWidth(`開場${reservationModel.performance.open_time.substr(0, 2)}:${reservationModel.performance.open_time.substr(2)}　開演${reservationModel.performance.start_time.substr(0, 2)}:${reservationModel.performance.start_time.substr(2)}`);
+                this.res.locals.shopId = conf.get('gmo_payment_shop_id');
+                this.res.locals.orderID = reservationModel.paymentNo; // 27桁まで(購入番号を使用)
+                this.res.locals.amount = reservationModel.getTotalCharge().toString();
+                this.res.locals.dateTime = moment(reservationModel.purchasedAt).format('YYYYMMDDHHmmss');
+                this.res.locals.useCredit = (reservationModel.paymentMethod === GMOUtil_1.default.PAY_TYPE_CREDIT) ? '1' : '0';
+                this.res.locals.useCvs = (reservationModel.paymentMethod === GMOUtil_1.default.PAY_TYPE_CVS) ? '1' : '0';
+                this.res.locals.shopPassString = GMOUtil_1.default.createShopPassString(conf.get('gmo_payment_shop_id'), this.res.locals.orderID, this.res.locals.amount, conf.get('gmo_payment_shop_password'), this.res.locals.dateTime);
+                this.logger.info('redirecting to GMO payment...');
+                // GMOへの送信データをログに残すために、一度htmlを取得してからrender
+                this.res.render('gmo/reserve/start', (err, html) => {
+                    this.logger.info('rendering gmo/reserve/start...html:', html);
+                    this.res.render('gmo/reserve/token', { layout: false, token: token });
+                });
+            });
+            // });
+        });
+    }
+    /**
+     * GMO決済を実行する
+     */
+    execute() {
+        let token = this.req.params.token;
+        ReservationModel_1.default.find(token, (err, reservationModel) => {
+            if (err)
+                return this.next(new Error(this.req.__('Message.Expired')));
+            let gmoToken = this.req.body.gmo_token;
+            let options;
+            // 取引登録
+            options = {
+                url: 'https://pt01.mul-pay.jp/payment/EntryTran.idPass',
+                form: {
+                    ShopID: conf.get('gmo_payment_shop_id'),
+                    ShopPass: conf.get('gmo_payment_shop_password'),
+                    OrderID: reservationModel.paymentNo,
+                    JobCd: GMOUtil_1.default.STATUS_CREDIT_CAPTURE,
+                    Amount: reservationModel.getTotalCharge()
+                }
+            };
+            this.logger.info('requesting... options:', options);
+            request.post(options, (error, response, body) => {
+                this.logger.info('request processed.', error, body);
+                if (error)
+                    return this.next(error);
+                if (response.statusCode !== 200)
+                    return this.next(new Error(body));
+                let entryTranResult = querystring.parse(body);
+                if (entryTranResult['ErrCode'])
+                    return this.next(new Error(body));
+                // 決済実行
+                options = {
+                    url: 'https://pt01.mul-pay.jp/payment/ExecTran.idPass',
+                    form: {
+                        AccessID: entryTranResult.AccessID,
+                        AccessPass: entryTranResult.AccessPass,
+                        ShopID: conf.get('gmo_payment_shop_id'),
+                        ShopPass: conf.get('gmo_payment_shop_password'),
+                        OrderID: reservationModel.paymentNo,
+                        JobCd: GMOUtil_1.default.STATUS_CREDIT_CAPTURE,
+                        Amount: reservationModel.getTotalCharge().toString(),
+                        Method: '1',
+                        PayTimes: 1,
+                        Token: gmoToken
+                    }
+                };
+                this.logger.info('requesting... options:', options);
+                request.post(options, (error, response, body) => {
+                    this.logger.info('request processed.', error, body);
+                    if (error)
+                        return this.next(error);
+                    if (response.statusCode !== 200)
+                        return this.next(new Error(body));
+                    let execTranResult = querystring.parse(body);
+                    if (execTranResult['ErrCode'])
+                        return this.next(new Error(body));
+                    this.res.send(execTranResult.OrderID);
                 });
             });
         });
