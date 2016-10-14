@@ -1,14 +1,16 @@
 import redis = require('redis');
 import conf = require('config');
 
-let client = redis.createClient(
-    conf.get<number>('redis_port'),
-    conf.get<string>('redis_host'),
-    {
-        password: conf.get<string>('redis_key'),
-        tls: {servername: conf.get<string>('redis_host')},
-        return_buffers: true
-    }
-);
+let port = conf.get<number>('redis_port')
+let host = conf.get<string>('redis_host')
+let options = {
+    password: conf.get<string>('redis_key'),
+    return_buffers: true
+};
+if (port === 6380) {
+    options['tls'] = {servername: host};
+}
+
+let client = redis.createClient(port, host, options);
 
 export default client;
