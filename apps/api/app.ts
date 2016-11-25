@@ -4,7 +4,7 @@ import bodyParser = require('body-parser');
 // import multer = require('multer');
 import logger from './middlewares/logger';
 import benchmarks from './middlewares/benchmarks';
-import router from './routes/router';
+// import router from './routes/router';
 import conf = require('config');
 import mongoose = require('mongoose');
 import i18n = require('i18n');
@@ -12,6 +12,10 @@ import passport = require('passport');
 import passportHttpBearer = require('passport-http-bearer');
 let BearerStrategy = passportHttpBearer.Strategy;
 import Models from '../common/models/Models';
+
+import "reflect-metadata";
+import {useContainer, useExpressServer} from "routing-controllers";
+// import {Container} from "typedi";
 
 passport.use(new BearerStrategy(
     (token, cb) => {
@@ -92,13 +96,11 @@ app.use(i18n.init);
 
 
 
-// ルーティング
-router(app);
-
 
 let MONGOLAB_URI = conf.get<string>('mongolab_uri');
 
-mongoose.connect(MONGOLAB_URI, {});
+mongoose.connect(MONGOLAB_URI, {
+});
 
 
 
@@ -126,6 +128,9 @@ if (process.env.NODE_ENV !== 'prod') {
     });
 }
 
+// now import all our controllers. alternatively you can specify controllerDirs in routing-controller options
+import "./controllers/PerformanceController";
 
+useExpressServer(app);
 
 export = app;

@@ -5,6 +5,8 @@
         // "declarationDir": "./definitions",
         "diagnostics": true,
         "disableSizeLimit": false,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators":true,
         "forceConsistentCasingInFileNames": true,
         "inlineSourceMap": false,
         "inlineSources": false,

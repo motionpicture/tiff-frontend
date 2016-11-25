@@ -2,10 +2,8 @@ import NamedRoutes = require('named-routes');
 import passport = require('passport');
 
 import AuthController from '../controllers/Auth/AuthController';
-import PerformanceController from '../controllers/Performance/PerformanceController';
 import ReservationController from '../controllers/Reservation/ReservationController';
 import ScreenController from '../controllers/Screen/ScreenController';
-import OtherController from '../controllers/Other/OtherController';
 
 
 /**
@@ -25,8 +23,6 @@ export default (app: any) => {
 
 
 
-    // search performances
-    app.get('/api/:locale/performance/search', 'performance.search', (req, res, next) => {(new PerformanceController(req, res, next)).search()});
 
     // reservation email
     app.post('/api/:locale/reservation/email', 'reservation.email', (req, res, next) => {(new ReservationController(req, res, next)).email()});
@@ -47,9 +43,6 @@ export default (app: any) => {
 
     // enter
     app.post('/api/reservation/:id/enter', 'reservation.enter', (req, res, next) => {(new ReservationController(req, res, next)).enter()});
-
-    // 環境変数
-    app.get('/api/environmentVariables', 'environmentVariables', (req, res, next) => {(new OtherController(req, res, next)).environmentVariables()});
 
 
     // 404

@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 // import multer = require('multer');
 const logger_1 = require('./middlewares/logger');
 const benchmarks_1 = require('./middlewares/benchmarks');
-const router_1 = require('./routes/router');
+// import router from './routes/router';
 const conf = require('config');
 const mongoose = require('mongoose');
 const i18n = require('i18n');
@@ -13,6 +13,9 @@ const passport = require('passport');
 const passportHttpBearer = require('passport-http-bearer');
 let BearerStrategy = passportHttpBearer.Strategy;
 const Models_1 = require('../common/models/Models');
+require("reflect-metadata");
+const routing_controllers_1 = require("routing-controllers");
+// import {Container} from "typedi";
 passport.use(new BearerStrategy((token, cb) => {
     Models_1.default.Authentication.findOne({
         token: token
@@ -68,8 +71,6 @@ i18n.configure({
 });
 // i18n の設定を有効化
 app.use(i18n.init);
-// ルーティング
-router_1.default(app);
 let MONGOLAB_URI = conf.get('mongolab_uri');
 mongoose.connect(MONGOLAB_URI, {});
 if (process.env.NODE_ENV !== 'prod') {
@@ -93,4 +94,7 @@ if (process.env.NODE_ENV !== 'prod') {
         console.log('disconnected.');
     });
 }
+// now import all our controllers. alternatively you can specify controllerDirs in routing-controller options
+require("./controllers/PerformanceController");
+routing_controllers_1.useExpressServer(app);
 module.exports = app;
