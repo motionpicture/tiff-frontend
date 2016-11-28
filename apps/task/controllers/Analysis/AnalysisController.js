@@ -604,6 +604,23 @@ class AnalysisController extends BaseController_1.default {
             process.exit(0);
         });
     }
+    checkTime2reloadProcess() {
+        // request.get({
+        //     url: 'https://devtiffwebapp.azurewebsites.net/api/500',
+        //     time : true
+        // }, (error, response, body) => {
+        //     this.logger.info(`request processed. ${response.elapsedTime} seconds.`, error, response.statusCode);
+        //     if (error) return process.exit(0);
+        //     request.get({
+        //         url: 'https://devtiffwebapp.azurewebsites.net/api/environmentVariables',
+        //         time : true
+        //     }, (error, response, body) => {
+        //         this.logger.info(`request processed. ${response.elapsedTime} seconds.`, error, response.statusCode);
+        //         // if (response.statusCode !== 200) return process.exit(0);
+        //         process.exit(0);
+        //     });
+        // });
+    }
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = AnalysisController;

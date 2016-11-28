@@ -1,3 +1,4 @@
+import {BaseController} from './BaseController';
 import {Request, Response} from "express";
 import {JsonController, Req, Res, Param, Body, Get, Post, Put, Delete} from "routing-controllers";
 import Models from '../../common/models/Models';
@@ -6,7 +7,7 @@ import Moment = require('moment');
 import Conf = require('config');
 
 @JsonController()
-export class PerformanceController {
+export class PerformanceController extends BaseController {
     @Get("/api/environmentVariables")
     environmentVariables() {
         return {
@@ -15,20 +16,11 @@ export class PerformanceController {
         };
     }
 
-    @Get("/api/performances")
-    getAll() {
-        return Models.Performance.find().lean(true).exec().then((performances) => {
-            return {
-                success: true,
-            };
-        });
-    }
-
     /**
      * パフォーマンス検索API
      */
     @Get("/api/:locale/performance/search")
-    public search(@Req() request: Request, @Res() response: Response, @Param("locale") locale: string) {
+    search(@Req() request: Request, @Res() response: Response, @Param("locale") locale: string) {
         let limit: number = (request.query.limit) ? parseInt(request.query.limit) : null;
         let page: number = (request.query.page) ? parseInt(request.query.page) : 1;
 
@@ -100,21 +92,18 @@ export class PerformanceController {
 
                     // 必要な項目だけ指定すること(レスポンスタイムに大きく影響するので)
                     let fields = '';
-                    if (request.getLocale() === 'ja') {
+                    if (locale === 'ja') {
                         fields = 'day open_time start_time film screen screen_name.ja theater theater_name.ja';
                     } else {
                         fields = 'day open_time start_time film screen screen_name.en theater theater_name.en';
                     }
-                    let query = Models.Performance.find(
-                        conditions,
-                        fields
-                    )
+                    let query = Models.Performance.find(conditions, fields);
 
                     if (limit) {
                         query.skip(limit * (page - 1)).limit(limit);
                     }
 
-                    if (request.getLocale() === 'ja') {
+                    if (locale === 'ja') {
                         query.populate('film', 'name.ja sections.name.ja minutes copyright');
                     } else {
                         query.populate('film', 'name.en sections.name.en minutes copyright');
@@ -131,32 +120,37 @@ export class PerformanceController {
                     return query.lean(true).exec().then((performances: Array<any>) => {
                         // 空席情報を追加
                         let conf: typeof Conf = require('config');
-                        // PerformanceStatusesModel.find((err, performanceStatusesModel) => {
+
+                        return new Promise((resolve, reject) => {
+                            PerformanceStatusesModel.find((err, performanceStatusesModel) => {
+                                resolve(performanceStatusesModel);
+                            });
+                        }).then((performanceStatusesModel: PerformanceStatusesModel) => {
                             let results = performances.map((performance) => {
                                 return {
                                     _id: performance['_id'],
                                     day: performance['day'],
                                     open_time: performance['open_time'],
                                     start_time: performance['start_time'],
-                                    // seat_status: (performanceStatusesModel) ? performanceStatusesModel.getStatus(performance['_id'].toString()) : null,
-                                    theater_name: performance['theater_name'][request.getLocale()],
-                                    screen_name: performance['screen_name'][request.getLocale()],
+                                    seat_status: (performanceStatusesModel) ? performanceStatusesModel.getStatus(performance['_id'].toString()) : null,
+                                    theater_name: performance['theater_name'][locale],
+                                    screen_name: performance['screen_name'][locale],
                                     film_id: performance['film']['_id'],
-                                    film_name: performance['film']['name'][request.getLocale()],
-                                    film_sections: performance['film']['sections'].map((section) => {return section['name'][request.getLocale()];}),
+                                    film_name: performance['film']['name'][locale],
+                                    film_sections: performance['film']['sections'].map((section) => {return section['name'][locale];}),
                                     film_minutes: performance['film']['minutes'],
                                     film_copyright: performance['film']['copyright'],
                                     film_image: `https://${conf.get<string>('dns_name')}/images/film/${performance['film']['_id']}.jpg`
                                 };
                             });
 
-                            response.json({
+                            return {
                                 success: true,
                                 results: results,
                                 performances_count: performances_count,
                                 films_count: filmIds.length
-                            });
-                        // });
+                            };
+                        });
                     });
 
                 });

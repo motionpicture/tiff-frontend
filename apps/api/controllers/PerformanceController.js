@@ -11,21 +11,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+const BaseController_1 = require('./BaseController');
 const routing_controllers_1 = require("routing-controllers");
 const Models_1 = require('../../common/models/Models');
-let PerformanceController = class PerformanceController {
+const PerformanceStatusesModel_1 = require('../../common/models/PerformanceStatusesModel');
+let PerformanceController = class PerformanceController extends BaseController_1.BaseController {
     environmentVariables() {
         return {
             success: true,
             variables: process.env
         };
-    }
-    getAll() {
-        return Models_1.default.Performance.find().lean(true).exec().then((performances) => {
-            return {
-                success: true,
-            };
-        });
     }
     /**
      * パフォーマンス検索API
@@ -92,7 +87,7 @@ let PerformanceController = class PerformanceController {
                 return Models_1.default.Performance.count(conditions).then((performances_count) => {
                     // 必要な項目だけ指定すること(レスポンスタイムに大きく影響するので)
                     let fields = '';
-                    if (request.getLocale() === 'ja') {
+                    if (locale === 'ja') {
                         fields = 'day open_time start_time film screen screen_name.ja theater theater_name.ja';
                     }
                     else {
@@ -102,7 +97,7 @@ let PerformanceController = class PerformanceController {
                     if (limit) {
                         query.skip(limit * (page - 1)).limit(limit);
                     }
-                    if (request.getLocale() === 'ja') {
+                    if (locale === 'ja') {
                         query.populate('film', 'name.ja sections.name.ja minutes copyright');
                     }
                     else {
@@ -118,31 +113,35 @@ let PerformanceController = class PerformanceController {
                     return query.lean(true).exec().then((performances) => {
                         // 空席情報を追加
                         let conf = require('config');
-                        // PerformanceStatusesModel.find((err, performanceStatusesModel) => {
-                        let results = performances.map((performance) => {
+                        return new Promise((resolve, reject) => {
+                            PerformanceStatusesModel_1.default.find((err, performanceStatusesModel) => {
+                                resolve(performanceStatusesModel);
+                            });
+                        }).then((performanceStatusesModel) => {
+                            let results = performances.map((performance) => {
+                                return {
+                                    _id: performance['_id'],
+                                    day: performance['day'],
+                                    open_time: performance['open_time'],
+                                    start_time: performance['start_time'],
+                                    seat_status: (performanceStatusesModel) ? performanceStatusesModel.getStatus(performance['_id'].toString()) : null,
+                                    theater_name: performance['theater_name'][locale],
+                                    screen_name: performance['screen_name'][locale],
+                                    film_id: performance['film']['_id'],
+                                    film_name: performance['film']['name'][locale],
+                                    film_sections: performance['film']['sections'].map((section) => { return section['name'][locale]; }),
+                                    film_minutes: performance['film']['minutes'],
+                                    film_copyright: performance['film']['copyright'],
+                                    film_image: `https://${conf.get('dns_name')}/images/film/${performance['film']['_id']}.jpg`
+                                };
+                            });
                             return {
-                                _id: performance['_id'],
-                                day: performance['day'],
-                                open_time: performance['open_time'],
-                                start_time: performance['start_time'],
-                                // seat_status: (performanceStatusesModel) ? performanceStatusesModel.getStatus(performance['_id'].toString()) : null,
-                                theater_name: performance['theater_name'][request.getLocale()],
-                                screen_name: performance['screen_name'][request.getLocale()],
-                                film_id: performance['film']['_id'],
-                                film_name: performance['film']['name'][request.getLocale()],
-                                film_sections: performance['film']['sections'].map((section) => { return section['name'][request.getLocale()]; }),
-                                film_minutes: performance['film']['minutes'],
-                                film_copyright: performance['film']['copyright'],
-                                film_image: `https://${conf.get('dns_name')}/images/film/${performance['film']['_id']}.jpg`
+                                success: true,
+                                results: results,
+                                performances_count: performances_count,
+                                films_count: filmIds.length
                             };
                         });
-                        response.json({
-                            success: true,
-                            results: results,
-                            performances_count: performances_count,
-                            films_count: filmIds.length
-                        });
-                        // });
                     });
                 });
             });
@@ -207,12 +206,6 @@ __decorate([
     __metadata('design:paramtypes', []), 
     __metadata('design:returntype', void 0)
 ], PerformanceController.prototype, "environmentVariables", null);
-__decorate([
-    routing_controllers_1.Get("/api/performances"), 
-    __metadata('design:type', Function), 
-    __metadata('design:paramtypes', []), 
-    __metadata('design:returntype', void 0)
-], PerformanceController.prototype, "getAll", null);
 __decorate([
     routing_controllers_1.Get("/api/:locale/performance/search"),
     __param(0, routing_controllers_1.Req()),

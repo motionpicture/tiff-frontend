@@ -4,7 +4,6 @@ import bodyParser = require('body-parser');
 // import multer = require('multer');
 import logger from './middlewares/logger';
 import benchmarks from './middlewares/benchmarks';
-// import router from './routes/router';
 import conf = require('config');
 import mongoose = require('mongoose');
 import i18n = require('i18n');
@@ -129,8 +128,27 @@ if (process.env.NODE_ENV !== 'prod') {
 }
 
 // now import all our controllers. alternatively you can specify controllerDirs in routing-controller options
+import "./controllers/AuthController";
 import "./controllers/PerformanceController";
+import "./controllers/ReservationController";
+import "./controllers/ScreenController";
 
 useExpressServer(app);
+
+// 404
+app.use((req, res, next) => {
+    res.json({
+        success: false,
+        message: 'Not Found'
+    });
+});
+
+// error handlers
+app.use((err: any, req, res, next) => {
+    res.json({
+        success: false,
+        message: 'Internal Server Error'
+    });
+});
 
 export = app;
