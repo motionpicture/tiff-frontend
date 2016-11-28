@@ -47,7 +47,7 @@ let AuthController = class AuthController extends BaseController_1.BaseControlle
     }
 };
 __decorate([
-    routing_controllers_1.Post("/api/login"), 
+    routing_controllers_1.Get("/api/login"), 
     __metadata('design:type', Function), 
     __metadata('design:paramtypes', []), 
     __metadata('design:returntype', void 0)

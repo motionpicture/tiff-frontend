@@ -1,6 +1,6 @@
 import {BaseController} from './BaseController';
 import {Request, Response, NextFunction} from "express";
-import {JsonController, Req, Res, Post, Get, Param} from "routing-controllers";
+import {JsonController, Req, Res, Post, Get, Param, UseBefore} from "routing-controllers";
 import Util from '../../common/Util/Util';
 import Models from '../../common/models/Models';
 import ReservationUtil from '../../common/models/Reservation/ReservationUtil';
@@ -10,6 +10,7 @@ import Validator = require('validator');
 import Qr = require('qr-image');
 import Moment = require('moment');
 import Fs = require('fs-extra');
+import passport = require('passport');
 
 @JsonController()
 export class ReservationController extends BaseController {
@@ -132,6 +133,7 @@ export class ReservationController extends BaseController {
         });
     }
 
+    @UseBefore(passport.authenticate('bearer', {session: false}))
     @Get("/api/reservations")
     findByMvtkUser() {
         return new Promise((resolve, reject) => {
@@ -157,6 +159,7 @@ export class ReservationController extends BaseController {
         });
     }
 
+    @UseBefore(passport.authenticate('bearer', {session: false}))
     @Get("/api/reservation/:id")
     findById(@Param("id") id: string) {
         return new Promise((resolve, reject) => {

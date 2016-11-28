@@ -15,6 +15,7 @@ const BaseController_1 = require('./BaseController');
 const routing_controllers_1 = require("routing-controllers");
 const Models_1 = require('../../common/models/Models');
 const ReservationUtil_1 = require('../../common/models/Reservation/ReservationUtil');
+const passport = require('passport');
 let ReservationController = class ReservationController extends BaseController_1.BaseController {
     /**
      * 予約情報メールを送信する
@@ -187,12 +188,14 @@ __decorate([
     __metadata('design:returntype', void 0)
 ], ReservationController.prototype, "enter", null);
 __decorate([
+    routing_controllers_1.UseBefore(passport.authenticate('bearer', { session: false })),
     routing_controllers_1.Get("/api/reservations"), 
     __metadata('design:type', Function), 
     __metadata('design:paramtypes', []), 
     __metadata('design:returntype', void 0)
 ], ReservationController.prototype, "findByMvtkUser", null);
 __decorate([
+    routing_controllers_1.UseBefore(passport.authenticate('bearer', { session: false })),
     routing_controllers_1.Get("/api/reservation/:id"),
     __param(0, routing_controllers_1.Param("id")), 
     __metadata('design:type', Function), 

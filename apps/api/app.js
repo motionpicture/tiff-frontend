@@ -3,18 +3,16 @@ const express = require('express');
 // import cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 // import multer = require('multer');
-const logger_1 = require('./middlewares/logger');
-const benchmarks_1 = require('./middlewares/benchmarks');
 const conf = require('config');
 const mongoose = require('mongoose');
 const i18n = require('i18n');
 const passport = require('passport');
 const passportHttpBearer = require('passport-http-bearer');
-let BearerStrategy = passportHttpBearer.Strategy;
 const Models_1 = require('../common/models/Models');
 require("reflect-metadata");
 const routing_controllers_1 = require("routing-controllers");
 // import {Container} from "typedi";
+let BearerStrategy = passportHttpBearer.Strategy;
 passport.use(new BearerStrategy((token, cb) => {
     Models_1.default.Authentication.findOne({
         token: token
@@ -27,9 +25,6 @@ passport.use(new BearerStrategy((token, cb) => {
     });
 }));
 let app = express();
-if (process.env.NODE_ENV === 'dev') {
-    app.use(logger_1.default); // ロガー
-}
 if (process.env.NODE_ENV !== 'prod') {
     // サーバーエラーテスト
     app.get('/api/500', (req, res) => {
@@ -50,7 +45,6 @@ if (process.env.NODE_ENV !== 'prod') {
         });
     });
 }
-app.use(benchmarks_1.default); // ベンチマーク的な
 // view engine setup
 app.set('views', `${__dirname}/views`);
 app.set('view engine', 'ejs');
@@ -74,43 +68,29 @@ let MONGOLAB_URI = conf.get('mongolab_uri');
 mongoose.connect(MONGOLAB_URI, {});
 if (process.env.NODE_ENV !== 'prod') {
     let db = mongoose.connection;
-    db.on('connecting', function () {
+    db.on('connecting', () => {
         console.log('connecting');
     });
-    db.on('error', function (error) {
+    db.on('error', (error) => {
         console.error('Error in MongoDb connection: ', error);
     });
-    db.on('connected', function () {
+    db.on('connected', () => {
         console.log('connected.');
     });
-    db.once('open', function () {
+    db.once('open', () => {
         console.log('connection open.');
     });
-    db.on('reconnected', function () {
+    db.on('reconnected', () => {
         console.log('reconnected.');
     });
-    db.on('disconnected', function () {
+    db.on('disconnected', () => {
         console.log('disconnected.');
     });
 }
 // now import all our controllers. alternatively you can specify controllerDirs in routing-controller options
-require("./controllers/AuthController");
-require("./controllers/PerformanceController");
-require("./controllers/ReservationController");
-require("./controllers/ScreenController");
-routing_controllers_1.useExpressServer(app);
-// 404
-app.use((req, res, next) => {
-    res.json({
-        success: false,
-        message: 'Not Found'
-    });
-});
-// error handlers
-app.use((err, req, res, next) => {
-    res.json({
-        success: false,
-        message: 'Internal Server Error'
-    });
+routing_controllers_1.useExpressServer(app, {
+    controllers: [__dirname + "/controllers/**/*.js"],
+    middlewares: [__dirname + "/middlewares/**/*.js"],
+    defaultErrorHandler: false // disable default error handler, only if you have your own error handler
 });
 module.exports = app;

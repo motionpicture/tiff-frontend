@@ -26,6 +26,7 @@ let PerformanceController = class PerformanceController extends BaseController_1
      * パフォーマンス検索API
      */
     search(request, response, locale) {
+        console.log(locale);
         let limit = (request.query.limit) ? parseInt(request.query.limit) : null;
         let page = (request.query.page) ? parseInt(request.query.page) : 1;
         let day = (request.query.day) ? request.query.day : null; // 上映日

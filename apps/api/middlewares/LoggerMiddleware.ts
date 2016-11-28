@@ -1,4 +1,5 @@
 import log4js = require('log4js');
+import {MiddlewareGlobalBefore, MiddlewareInterface} from "routing-controllers";
 
 let env = process.env.NODE_ENV || 'dev';
 
@@ -32,4 +33,13 @@ log4js.configure({
     replaceConsole: (env === 'prod') ? false : true
 });
 
-export default log4js.connectLogger(log4js.getLogger('access'), {});
+@MiddlewareGlobalBefore()
+export class LoggerMiddleware implements MiddlewareInterface {
+    use(request: any, response: any, next?: (err: any) => any): any {
+        if (process.env.NODE_ENV === 'dev') {
+            return log4js.connectLogger(log4js.getLogger('access'), {})(request, response, next);
+        } else {
+            next(null);
+        }
+    }
+}

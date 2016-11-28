@@ -1,6 +1,6 @@
 import {BaseController} from './BaseController';
 import {Request, Response} from "express";
-import {JsonController, Req, Res, Param, Body, Get, Post, Put, Delete} from "routing-controllers";
+import {JsonController, Req, Res, Param, Get} from "routing-controllers";
 import Models from '../../common/models/Models';
 import PerformanceStatusesModel from '../../common/models/PerformanceStatusesModel';
 import Moment = require('moment');
@@ -21,6 +21,7 @@ export class PerformanceController extends BaseController {
      */
     @Get("/api/:locale/performance/search")
     search(@Req() request: Request, @Res() response: Response, @Param("locale") locale: string) {
+        console.log(locale);
         let limit: number = (request.query.limit) ? parseInt(request.query.limit) : null;
         let page: number = (request.query.page) ? parseInt(request.query.page) : 1;
 

@@ -10,7 +10,7 @@ export class AuthController extends BaseController {
     /**
      * ログイン
      */
-    @Post("/api/login")
+    @Get("/api/login")
     login() {
         return new Promise((resolve, reject) => {
             let util: typeof Util = require('../../common/Util/Util').default;
