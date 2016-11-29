@@ -10,7 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 const BaseController_1 = require('./BaseController');
 const routing_controllers_1 = require("routing-controllers");
-const Models_1 = require('../../common/models/Models');
+const MongooseModels_1 = require('../../common/models/MongooseModels');
 let AuthController = class AuthController extends BaseController_1.BaseController {
     /**
      * ログイン
@@ -19,7 +19,7 @@ let AuthController = class AuthController extends BaseController_1.BaseControlle
         return new Promise((resolve, reject) => {
             let util = require('../../common/Util/Util').default;
             let token = util.createToken();
-            Models_1.default.Authentication.findOneAndUpdate({
+            MongooseModels_1.AuthenticationModel.findOneAndUpdate({
                 mvtk_kiin_cd: '00000775' // テスト用会員コード
             }, {
                 token: token,

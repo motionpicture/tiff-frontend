@@ -13,14 +13,14 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 const BaseController_1 = require('./BaseController');
 const routing_controllers_1 = require("routing-controllers");
-const Models_1 = require('../../common/models/Models');
+const MongooseModels_1 = require('../../common/models/MongooseModels');
 let ScreenController = class ScreenController extends BaseController_1.BaseController {
     /**
      * スクリーンの座席マップを生成する
      */
     show(id) {
         // スクリーンを取得
-        return Models_1.default.Screen.count({ _id: id }).then((count) => {
+        return MongooseModels_1.ScreenModel.count({ _id: id }).then((count) => {
             if (count === 0)
                 return 'false';
             // スクリーン座席表HTMLを出力

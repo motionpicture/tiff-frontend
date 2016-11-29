@@ -1,7 +1,7 @@
 import {BaseController} from './BaseController';
 import {Request, Response} from "express";
 import {Controller, ContentType, Get, Param} from "routing-controllers";
-import Models from '../../common/models/Models';
+import {ScreenModel} from '../../common/models/MongooseModels';
 import Fs = require('fs-extra');
 
 @Controller()
@@ -13,7 +13,7 @@ export class ScreenController extends BaseController {
     @ContentType("text/plain")
     show(@Param("id") id: string) {
         // スクリーンを取得
-        return Models.Screen.count({_id: id}).then((count) => {
+        return ScreenModel.count({_id: id}).then((count) => {
             if (count === 0) return 'false';
 
             // スクリーン座席表HTMLを出力

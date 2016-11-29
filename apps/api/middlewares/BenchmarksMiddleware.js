@@ -23,7 +23,7 @@ let BenchmarksMiddleware = class BenchmarksMiddleware {
                 logger.debug(`benchmark took ${diff[0]} seconds and ${diff[1]} nanoseconds. memoryUsage:${memoryUsage} (${startMemory.rss} - ${endMemory.rss})`);
             });
         }
-        next(null);
+        next();
     }
 };
 BenchmarksMiddleware = __decorate([

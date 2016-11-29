@@ -1,0 +1,168 @@
+"use strict";
+const mongoose = require('mongoose');
+const AuthenticationSchema_1 = require('../models/Authentication/AuthenticationSchema');
+const CustomerCancelRequestSchema_1 = require('../models/CustomerCancelRequest/CustomerCancelRequestSchema');
+const FilmSchema_1 = require('../models/Film/FilmSchema');
+const GMONotificationSchema_1 = require('../models/GMONotification/GMONotificationSchema');
+const MemberSchema_1 = require('../models/Member/MemberSchema');
+const PerformanceSchema_1 = require('../models/Performance/PerformanceSchema');
+const PreCustomerSchema_1 = require('../models/PreCustomer/PreCustomerSchema');
+const ReservationSchema_1 = require('../models/Reservation/ReservationSchema');
+const ReservationEmailCueSchema_1 = require('../models/ReservationEmailCue/ReservationEmailCueSchema');
+const ScreenSchema_1 = require('../models/Screen/ScreenSchema');
+const SendGridEventNotificationSchema_1 = require('../models/SendGridEventNotification/SendGridEventNotificationSchema');
+const SequenceSchema_1 = require('../models/Sequence/SequenceSchema');
+const SponsorSchema_1 = require('../models/Sponsor/SponsorSchema');
+const StaffSchema_1 = require('../models/Staff/StaffSchema');
+const TelStaffSchema_1 = require('../models/TelStaff/TelStaffSchema');
+const TheaterSchema_1 = require('../models/Theater/TheaterSchema');
+const TicketTypeGroupSchema_1 = require('../models/TicketTypeGroup/TicketTypeGroupSchema');
+const WindowSchema_1 = require('../models/Window/WindowSchema');
+/**
+ * 作品と予約の整合性を保つ
+ */
+FilmSchema_1.default.post('findOneAndUpdate', function (doc, next) {
+    ReservationModel.update({
+        film: doc['_id']
+    }, {
+        film_name_ja: doc["name"]["ja"],
+        film_name_en: doc["name"]["en"],
+        film_is_mx4d: doc["is_mx4d"],
+        film_copyright: doc["copyright"]
+    }, { multi: true }, (err, raw) => {
+        console.log('related reservations updated.', err, raw);
+        next();
+    });
+});
+/**
+ * 劇場とパフォーマンスの整合性を保つ
+ * 劇場と予約の整合性を保つ
+ */
+TheaterSchema_1.default.post('findOneAndUpdate', function (doc, next) {
+    PerformanceModel.update({
+        theater: doc['_id']
+    }, {
+        "theater_name.ja": doc["name"]["ja"],
+        "theater_name.en": doc["name"]["en"]
+    }, { multi: true }, (err, raw) => {
+        console.log('related performances updated.', err, raw);
+        ReservationModel.update({
+            theater: doc['_id']
+        }, {
+            theater_name_ja: doc["name"]["ja"],
+            theater_name_en: doc["name"]["en"],
+            theater_address_ja: doc["address"]["ja"],
+            theater_address_en: doc["address"]["en"]
+        }, { multi: true }, (err, raw) => {
+            console.log('related reservations updated.', err, raw);
+            next();
+        });
+    });
+});
+/**
+ * スクリーンとパフォーマンスの整合性を保つ
+ * スクリーンと予約の整合性を保つ
+ */
+ScreenSchema_1.default.post('findOneAndUpdate', function (doc, next) {
+    PerformanceModel.update({
+        screen: doc['_id']
+    }, {
+        "screen_name.ja": doc["name"]["ja"],
+        "screen_name.en": doc["name"]["en"]
+    }, { multi: true }, (err, raw) => {
+        console.log('related performances updated.', err, raw);
+        ReservationModel.update({
+            screen: doc['_id']
+        }, {
+            screen_name_ja: doc["name"]["ja"],
+            screen_name_en: doc["name"]["en"]
+        }, { multi: true }, (err, raw) => {
+            console.log('related reservations updated.', err, raw);
+            next();
+        });
+    });
+});
+/**
+ * パフォーマンスと予約の整合性を保つ
+ */
+PerformanceSchema_1.default.post('findOneAndUpdate', function (doc, next) {
+    ReservationModel.update({
+        performance: doc['_id']
+    }, {
+        performance_day: doc['day'],
+        performance_open_time: doc['open_time'],
+        performance_start_time: doc['start_time'],
+        performance_end_time: doc['end_time'],
+        performance_canceled: doc['canceled'],
+    }, { multi: true }, (err, raw) => {
+        console.log('related reservation updated.', err, raw);
+        next();
+    });
+});
+/**
+ * 外部関係者と予約の整合性を保つ
+ */
+SponsorSchema_1.default.post('findOneAndUpdate', function (doc, next) {
+    ReservationModel.update({
+        sponsor: doc['_id']
+    }, {
+        sponsor_name: doc['name'],
+        sponsor_email: doc['email']
+    }, { multi: true }, (err, raw) => {
+        console.log('related reservation updated.', err, raw);
+        next();
+    });
+});
+/**
+ * 内部関係者と予約の整合性を保つ
+ */
+StaffSchema_1.default.post('findOneAndUpdate', function (doc, next) {
+    ReservationModel.update({
+        staff: doc['_id']
+    }, {
+        staff_name: doc['name'],
+        staff_email: doc['email']
+    }, { multi: true }, (err, raw) => {
+        console.log('related reservation updated.', err, raw);
+        next();
+    });
+});
+let AuthenticationModel = mongoose.model('Authentication', AuthenticationSchema_1.default);
+exports.AuthenticationModel = AuthenticationModel;
+let CustomerCancelRequestModel = mongoose.model('CustomerCancelRequest', CustomerCancelRequestSchema_1.default);
+exports.CustomerCancelRequestModel = CustomerCancelRequestModel;
+let FilmModel = mongoose.model('Film', FilmSchema_1.default);
+exports.FilmModel = FilmModel;
+let GMONotificationModel = mongoose.model('GMONotification', GMONotificationSchema_1.default);
+exports.GMONotificationModel = GMONotificationModel;
+let MemberModel = mongoose.model('Member', MemberSchema_1.default);
+exports.MemberModel = MemberModel;
+let PerformanceModel = mongoose.model('Performance', PerformanceSchema_1.default);
+exports.PerformanceModel = PerformanceModel;
+let PreCustomerModel = mongoose.model('PreCustomer', PreCustomerSchema_1.default);
+exports.PreCustomerModel = PreCustomerModel;
+let ReservationModel = mongoose.model('Reservation', ReservationSchema_1.default);
+exports.ReservationModel = ReservationModel;
+let ReservationEmailCueModel = mongoose.model('ReservationEmailCue', ReservationEmailCueSchema_1.default);
+exports.ReservationEmailCueModel = ReservationEmailCueModel;
+let ScreenModel = mongoose.model('Screen', ScreenSchema_1.default);
+exports.ScreenModel = ScreenModel;
+let SendGridEventNotificationModel = mongoose.model('SendGridEventNotification', SendGridEventNotificationSchema_1.default);
+exports.SendGridEventNotificationModel = SendGridEventNotificationModel;
+let SequenceModel = mongoose.model('Sequence', SequenceSchema_1.default);
+exports.SequenceModel = SequenceModel;
+let SponsorModel = mongoose.model('Sponsor', SponsorSchema_1.default);
+exports.SponsorModel = SponsorModel;
+let StaffModel = mongoose.model('Staff', StaffSchema_1.default);
+exports.StaffModel = StaffModel;
+let TelStaffModel = mongoose.model('TelStaff', TelStaffSchema_1.default);
+exports.TelStaffModel = TelStaffModel;
+let TheaterModel = mongoose.model('Theater', TheaterSchema_1.default);
+exports.TheaterModel = TheaterModel;
+let TicketTypeGroupModel = mongoose.model('TicketTypeGroup', TicketTypeGroupSchema_1.default);
+exports.TicketTypeGroupModel = TicketTypeGroupModel;
+let WindowModel = mongoose.model('Window', WindowSchema_1.default);
+exports.WindowModel = WindowModel;
+/**
+ * MongoDBのモデルをまとめたモジュール
+ */

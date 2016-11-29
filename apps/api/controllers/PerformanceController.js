@@ -13,15 +13,9 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 const BaseController_1 = require('./BaseController');
 const routing_controllers_1 = require("routing-controllers");
-const Models_1 = require('../../common/models/Models');
+const MongooseModels_1 = require('../../common/models/MongooseModels');
 const PerformanceStatusesModel_1 = require('../../common/models/PerformanceStatusesModel');
 let PerformanceController = class PerformanceController extends BaseController_1.BaseController {
-    environmentVariables() {
-        return {
-            success: true,
-            variables: process.env
-        };
-    }
     /**
      * パフォーマンス検索API
      */
@@ -83,9 +77,9 @@ let PerformanceController = class PerformanceController extends BaseController_1
                 };
             }
             // 作品件数取得
-            return Models_1.default.Performance.distinct('film', conditions).then((filmIds) => {
+            return MongooseModels_1.PerformanceModel.distinct('film', conditions).then((filmIds) => {
                 // 総数検索
-                return Models_1.default.Performance.count(conditions).then((performances_count) => {
+                return MongooseModels_1.PerformanceModel.count(conditions).then((performances_count) => {
                     // 必要な項目だけ指定すること(レスポンスタイムに大きく影響するので)
                     let fields = '';
                     if (locale === 'ja') {
@@ -94,7 +88,7 @@ let PerformanceController = class PerformanceController extends BaseController_1
                     else {
                         fields = 'day open_time start_time film screen screen_name.en theater theater_name.en';
                     }
-                    let query = Models_1.default.Performance.find(conditions, fields);
+                    let query = MongooseModels_1.PerformanceModel.find(conditions, fields);
                     if (limit) {
                         query.skip(limit * (page - 1)).limit(limit);
                     }
@@ -183,7 +177,7 @@ let PerformanceController = class PerformanceController extends BaseController_1
         let filmConditions = {
             $and: filmAndConditions
         };
-        return Models_1.default.Film.distinct('_id', filmConditions).then((filmIds) => {
+        return MongooseModels_1.FilmModel.distinct('_id', filmConditions).then((filmIds) => {
             if (filmIds.length > 0) {
                 andConditions.push({
                     'film': {
@@ -201,12 +195,6 @@ let PerformanceController = class PerformanceController extends BaseController_1
         });
     }
 };
-__decorate([
-    routing_controllers_1.Get("/api/environmentVariables"), 
-    __metadata('design:type', Function), 
-    __metadata('design:paramtypes', []), 
-    __metadata('design:returntype', void 0)
-], PerformanceController.prototype, "environmentVariables", null);
 __decorate([
     routing_controllers_1.Get("/api/:locale/performance/search"),
     __param(0, routing_controllers_1.Req()),

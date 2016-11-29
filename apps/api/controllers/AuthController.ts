@@ -1,7 +1,7 @@
 import {BaseController} from './BaseController';
 import {Request, Response} from "express";
 import {JsonController, Req, Res, Param, Body, Get, Post, Put, Delete} from "routing-controllers";
-import Models from '../../common/models/Models';
+import {AuthenticationModel} from '../../common/models/MongooseModels';
 import Util from '../../common/Util/Util';
 import mongoose = require("mongoose");
 
@@ -15,7 +15,7 @@ export class AuthController extends BaseController {
         return new Promise((resolve, reject) => {
             let util: typeof Util = require('../../common/Util/Util').default;
             let token = util.createToken();
-            Models.Authentication.findOneAndUpdate({
+            AuthenticationModel.findOneAndUpdate({
                 mvtk_kiin_cd: '00000775' // テスト用会員コード
             },
             {

@@ -1,21 +1,13 @@
 import {BaseController} from './BaseController';
 import {Request, Response} from "express";
 import {JsonController, Req, Res, Param, Get} from "routing-controllers";
-import Models from '../../common/models/Models';
+import {FilmModel, PerformanceModel} from '../../common/models/MongooseModels';
 import PerformanceStatusesModel from '../../common/models/PerformanceStatusesModel';
 import Moment = require('moment');
 import Conf = require('config');
 
 @JsonController()
 export class PerformanceController extends BaseController {
-    @Get("/api/environmentVariables")
-    environmentVariables() {
-        return {
-            success: true,
-            variables: process.env
-        };
-    }
-
     /**
      * パフォーマンス検索API
      */
@@ -87,9 +79,9 @@ export class PerformanceController extends BaseController {
             }
 
             // 作品件数取得
-            return Models.Performance.distinct('film', conditions).then((filmIds) => {
+            return PerformanceModel.distinct('film', conditions).then((filmIds) => {
                 // 総数検索
-                return Models.Performance.count(conditions).then((performances_count) => {
+                return PerformanceModel.count(conditions).then((performances_count) => {
 
                     // 必要な項目だけ指定すること(レスポンスタイムに大きく影響するので)
                     let fields = '';
@@ -98,7 +90,7 @@ export class PerformanceController extends BaseController {
                     } else {
                         fields = 'day open_time start_time film screen screen_name.en theater theater_name.en';
                     }
-                    let query = Models.Performance.find(conditions, fields);
+                    let query = PerformanceModel.find(conditions, fields);
 
                     if (limit) {
                         query.skip(limit * (page - 1)).limit(limit);
@@ -203,7 +195,7 @@ export class PerformanceController extends BaseController {
             $and: filmAndConditions
         };
 
-        return Models.Film.distinct('_id', filmConditions).then((filmIds) => {
+        return FilmModel.distinct('_id', filmConditions).then((filmIds) => {
             if (filmIds.length > 0) {
                 andConditions.push({
                     'film': {

@@ -39,18 +39,6 @@ if (process.env.NODE_ENV !== 'prod') {
             throw new Error('500 manually.');
         })
     });
-
-    app.get('/api/disconnect', (req, res) => {
-        mongoose.disconnect((err) => {
-            res.send('disconnected.');
-        });
-    });
-
-    app.get('/api/connect', (req, res) => {
-        mongoose.connect(MONGOLAB_URI, (err) => {
-            res.send('connected.');
-        });
-    });
 }
 
 // view engine setup
@@ -111,7 +99,8 @@ if (process.env.NODE_ENV !== 'prod') {
 }
 
 import "reflect-metadata";
-import {useContainer, useExpressServer} from "routing-controllers";
+import {useExpressServer} from "routing-controllers";
+// import {useContainer, useExpressServer} from "routing-controllers";
 // import {Container} from "typedi";
 
 // its important to set container before any operation you do with routing-controllers,

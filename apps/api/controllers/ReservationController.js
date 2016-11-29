@@ -13,7 +13,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 const BaseController_1 = require('./BaseController');
 const routing_controllers_1 = require("routing-controllers");
-const Models_1 = require('../../common/models/Models');
+const MongooseModels_1 = require('../../common/models/MongooseModels');
 const ReservationUtil_1 = require('../../common/models/Reservation/ReservationUtil');
 const passport = require('passport');
 let ReservationController = class ReservationController extends BaseController_1.BaseController {
@@ -30,7 +30,7 @@ let ReservationController = class ReservationController extends BaseController_1
             if (!validator.isEmail(to)) {
                 return reject(new Error(request.__('Message.invalid{{fieldName}}', { fieldName: request.__('Form.FieldName.email') })));
             }
-            Models_1.default.Reservation.findOne({
+            MongooseModels_1.ReservationModel.findOne({
                 _id: id,
                 status: ReservationUtil_1.default.STATUS_RESERVED
             }, (err, reservation) => {
@@ -107,7 +107,7 @@ let ReservationController = class ReservationController extends BaseController_1
      */
     enter(request, id) {
         return new Promise((resolve, reject) => {
-            Models_1.default.Reservation.update({ _id: id }, {
+            MongooseModels_1.ReservationModel.update({ _id: id }, {
                 entered: true,
                 entered_at: request.body.entered_at
             }, (err, raw) => {
@@ -127,7 +127,7 @@ let ReservationController = class ReservationController extends BaseController_1
     findByMvtkUser() {
         return new Promise((resolve, reject) => {
             // ひとまずデモ段階では、一般予約を10件返す
-            Models_1.default.Reservation.find({
+            MongooseModels_1.ReservationModel.find({
                 purchaser_group: ReservationUtil_1.default.PURCHASER_GROUP_CUSTOMER,
                 status: ReservationUtil_1.default.STATUS_RESERVED
             }).limit(10).lean(true).exec((err, reservations) => {
@@ -149,7 +149,7 @@ let ReservationController = class ReservationController extends BaseController_1
     }
     findById(id) {
         return new Promise((resolve, reject) => {
-            Models_1.default.Reservation.findOne({
+            MongooseModels_1.ReservationModel.findOne({
                 _id: id,
                 status: ReservationUtil_1.default.STATUS_RESERVED
             }).lean(true).exec((err, reservation) => {

@@ -41,12 +41,9 @@ log4js.configure({
 });
 let LoggerMiddleware = class LoggerMiddleware {
     use(request, response, next) {
-        if (process.env.NODE_ENV === 'dev') {
+        if (process.env.NODE_ENV === 'dev')
             return log4js.connectLogger(log4js.getLogger('access'), {})(request, response, next);
-        }
-        else {
-            next(null);
-        }
+        next();
     }
 };
 LoggerMiddleware = __decorate([

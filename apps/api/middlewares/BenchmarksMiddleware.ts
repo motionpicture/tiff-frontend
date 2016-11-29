@@ -4,7 +4,7 @@ import Log4js = require('log4js');
 
 @MiddlewareGlobalBefore()
 export class BenchmarksMiddleware implements MiddlewareInterface {
-    use(request: any, response: any, next?: (err: any) => any): any {
+    use(request: any, response: any, next?: (err?: any) => any): any {
         if (process.env.NODE_ENV === 'dev') {
             let startMemory = process.memoryUsage();
             let startTime = process.hrtime();
@@ -21,6 +21,6 @@ export class BenchmarksMiddleware implements MiddlewareInterface {
             });
         }
 
-        next(null);
+        next();
     }
 }

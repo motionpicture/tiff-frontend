@@ -2,7 +2,7 @@ import {BaseController} from './BaseController';
 import {Request, Response, NextFunction} from "express";
 import {JsonController, Req, Res, Post, Get, Param, UseBefore} from "routing-controllers";
 import Util from '../../common/Util/Util';
-import Models from '../../common/models/Models';
+import {ReservationModel} from '../../common/models/MongooseModels';
 import ReservationUtil from '../../common/models/Reservation/ReservationUtil';
 import Sendgrid = require('sendgrid');
 import Conf = require('config');
@@ -30,7 +30,7 @@ export class ReservationController extends BaseController {
                 return reject(new Error(request.__('Message.invalid{{fieldName}}', {fieldName: request.__('Form.FieldName.email')})));
             }
 
-            Models.Reservation.findOne(
+            ReservationModel.findOne(
                 {
                     _id: id,
                     status: ReservationUtil.STATUS_RESERVED
@@ -115,7 +115,7 @@ export class ReservationController extends BaseController {
     @Post("/api/reservation/:id/enter")
     enter(@Req() request: Request, @Param("id") id: string) {
         return new Promise((resolve, reject) => {
-            Models.Reservation.update({_id: id}, {
+            ReservationModel.update({_id: id}, {
                 entered: true,
                 entered_at: request.body.entered_at
             }, (err, raw) => {
@@ -138,7 +138,7 @@ export class ReservationController extends BaseController {
     findByMvtkUser() {
         return new Promise((resolve, reject) => {
             // ひとまずデモ段階では、一般予約を10件返す
-            Models.Reservation.find({
+            ReservationModel.find({
                 purchaser_group: ReservationUtil.PURCHASER_GROUP_CUSTOMER,
                 status: ReservationUtil.STATUS_RESERVED
             }).limit(10).lean(true).exec((err, reservations) => {
@@ -163,7 +163,7 @@ export class ReservationController extends BaseController {
     @Get("/api/reservation/:id")
     findById(@Param("id") id: string) {
         return new Promise((resolve, reject) => {
-            Models.Reservation.findOne({
+            ReservationModel.findOne({
                 _id: id,
                 status: ReservationUtil.STATUS_RESERVED
             }).lean(true).exec((err, reservation) => {

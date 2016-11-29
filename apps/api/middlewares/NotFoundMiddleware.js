@@ -13,7 +13,7 @@ let NotFoundMiddleware = class NotFoundMiddleware {
     use(request, response, next) {
         if (!request.route)
             return next(new Error('Not Found'));
-        next(null);
+        next();
     }
 };
 NotFoundMiddleware = __decorate([

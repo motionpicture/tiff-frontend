@@ -35,11 +35,8 @@ log4js.configure({
 
 @MiddlewareGlobalBefore()
 export class LoggerMiddleware implements MiddlewareInterface {
-    use(request: any, response: any, next?: (err: any) => any): any {
-        if (process.env.NODE_ENV === 'dev') {
-            return log4js.connectLogger(log4js.getLogger('access'), {})(request, response, next);
-        } else {
-            next(null);
-        }
+    use(request: any, response: any, next?: (err?: any) => any): any {
+        if (process.env.NODE_ENV === 'dev') return log4js.connectLogger(log4js.getLogger('access'), {})(request, response, next);
+        next();
     }
 }
