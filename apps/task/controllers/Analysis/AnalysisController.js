@@ -612,7 +612,7 @@ class AnalysisController extends BaseController_1.default {
         //     this.logger.info(`request processed. ${response.elapsedTime} seconds.`, error, response.statusCode);
         //     if (error) return process.exit(0);
         //     request.get({
-        //         url: 'https://devtiffwebapp.azurewebsites.net/api/environmentVariables',
+        //         url: 'https://devtiffwebapp.azurewebsites.net/api/dev/environmentVariables',
         //         time : true
         //     }, (error, response, body) => {
         //         this.logger.info(`request processed. ${response.elapsedTime} seconds.`, error, response.statusCode);
