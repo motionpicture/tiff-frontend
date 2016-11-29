@@ -7,7 +7,7 @@ export class CustomErrorHandler implements ErrorMiddlewareInterface {
         console.error(error);
         response.json({
             success: false,
-            message: 'Internal Server Error'
+            message: error.message
         });
     }
 }

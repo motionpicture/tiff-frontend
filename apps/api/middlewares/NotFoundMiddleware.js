@@ -9,17 +9,15 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 const routing_controllers_1 = require("routing-controllers");
-let CustomErrorHandler = class CustomErrorHandler {
-    error(error, request, response, next) {
-        console.error(error);
-        response.json({
-            success: false,
-            message: error.message
-        });
+let NotFoundMiddleware = class NotFoundMiddleware {
+    use(request, response, next) {
+        if (!request.route)
+            return next(new Error('Not Found'));
+        next(null);
     }
 };
-CustomErrorHandler = __decorate([
+NotFoundMiddleware = __decorate([
     routing_controllers_1.MiddlewareGlobalAfter(), 
     __metadata('design:paramtypes', [])
-], CustomErrorHandler);
-exports.CustomErrorHandler = CustomErrorHandler;
+], NotFoundMiddleware);
+exports.NotFoundMiddleware = NotFoundMiddleware;

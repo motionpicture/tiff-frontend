@@ -9,9 +9,6 @@ const i18n = require('i18n');
 const passport = require('passport');
 const passportHttpBearer = require('passport-http-bearer');
 const Models_1 = require('../common/models/Models');
-require("reflect-metadata");
-const routing_controllers_1 = require("routing-controllers");
-// import {Container} from "typedi";
 let BearerStrategy = passportHttpBearer.Strategy;
 passport.use(new BearerStrategy((token, cb) => {
     Models_1.default.Authentication.findOne({
@@ -87,6 +84,12 @@ if (process.env.NODE_ENV !== 'prod') {
         console.log('disconnected.');
     });
 }
+require("reflect-metadata");
+const routing_controllers_1 = require("routing-controllers");
+// import {Container} from "typedi";
+// its important to set container before any operation you do with routing-controllers,
+// including importing controllers
+// useContainer(Container);
 // now import all our controllers. alternatively you can specify controllerDirs in routing-controller options
 routing_controllers_1.useExpressServer(app, {
     controllers: [__dirname + "/controllers/**/*.js"],

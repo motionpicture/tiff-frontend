@@ -9,10 +9,6 @@ import passport = require('passport');
 import passportHttpBearer = require('passport-http-bearer');
 import Models from '../common/models/Models';
 
-import "reflect-metadata";
-import {useContainer, useExpressServer} from "routing-controllers";
-// import {Container} from "typedi";
-
 let BearerStrategy = passportHttpBearer.Strategy;
 passport.use(new BearerStrategy(
     (token, cb) => {
@@ -114,19 +110,19 @@ if (process.env.NODE_ENV !== 'prod') {
     });
 }
 
+import "reflect-metadata";
+import {useContainer, useExpressServer} from "routing-controllers";
+// import {Container} from "typedi";
+
+// its important to set container before any operation you do with routing-controllers,
+// including importing controllers
+// useContainer(Container);
+
 // now import all our controllers. alternatively you can specify controllerDirs in routing-controller options
 useExpressServer(app, {
     controllers: [__dirname + "/controllers/**/*.js"],
     middlewares: [__dirname + "/middlewares/**/*.js"],
     defaultErrorHandler: false // disable default error handler, only if you have your own error handler
 });
-
-// 404
-// app.use((req, res, next) => {
-//     res.json({
-//         success: false,
-//         message: 'Not Found'
-//     });
-// });
 
 export = app;
