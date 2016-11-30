@@ -3,10 +3,16 @@ import express = require('express');
 import bodyParser = require('body-parser');
 // import multer = require('multer');
 import conf = require('config');
+
+let startTime = process.hrtime();
 import mongoose = require('mongoose');
+let diff = process.hrtime(startTime);
+console.log(`mongoose took ${diff[0]} seconds and ${diff[1]} nanoseconds.`);
+
 // import i18n = require('i18n');
 // import passport = require('passport');
 // import passportHttpBearer = require('passport-http-bearer');
+
 import Models from '../common/models/Models';
 
 // let BearerStrategy = passportHttpBearer.Strategy;
@@ -75,7 +81,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 let MONGOLAB_URI = conf.get<string>('mongolab_uri');
 mongoose.connect(MONGOLAB_URI, {
-});
+}
+, (err) => {
+    console.log('mongoose connected.', err);
+}
+);
 // if (process.env.NODE_ENV !== 'prod') {
 //     let db = mongoose.connection;
 //     db.on('connecting', () => {
@@ -98,6 +108,7 @@ mongoose.connect(MONGOLAB_URI, {
 //     });
 // }
 
+startTime = process.hrtime();
 import "reflect-metadata";
 import {useExpressServer} from "routing-controllers";
 // import {useContainer, useExpressServer} from "routing-controllers";
@@ -113,5 +124,8 @@ useExpressServer(app, {
     middlewares: [__dirname + "/middlewares/**/*.js"],
     defaultErrorHandler: false // disable default error handler, only if you have your own error handler
 });
+diff = process.hrtime(startTime);
+console.log(`useExpressServer took ${diff[0]} seconds and ${diff[1]} nanoseconds.`);
+
 
 export = app;

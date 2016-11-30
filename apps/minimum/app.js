@@ -4,7 +4,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 // import multer = require('multer');
 const conf = require('config');
+let startTime = process.hrtime();
 const mongoose = require('mongoose');
+let diff = process.hrtime(startTime);
+console.log(`mongoose took ${diff[0]} seconds and ${diff[1]} nanoseconds.`);
 // let BearerStrategy = passportHttpBearer.Strategy;
 // passport.use(new BearerStrategy(
 //     (token, cb) => {
@@ -51,7 +54,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // // i18n の設定を有効化
 // app.use(i18n.init);
 let MONGOLAB_URI = conf.get('mongolab_uri');
-mongoose.connect(MONGOLAB_URI, {});
+mongoose.connect(MONGOLAB_URI, {}, (err) => {
+    console.log('mongoose connected.', err);
+});
 // if (process.env.NODE_ENV !== 'prod') {
 //     let db = mongoose.connection;
 //     db.on('connecting', () => {
@@ -73,6 +78,7 @@ mongoose.connect(MONGOLAB_URI, {});
 //         console.log('disconnected.');
 //     });
 // }
+startTime = process.hrtime();
 require("reflect-metadata");
 const routing_controllers_1 = require("routing-controllers");
 // import {useContainer, useExpressServer} from "routing-controllers";
@@ -86,4 +92,6 @@ routing_controllers_1.useExpressServer(app, {
     middlewares: [__dirname + "/middlewares/**/*.js"],
     defaultErrorHandler: false // disable default error handler, only if you have your own error handler
 });
+diff = process.hrtime(startTime);
+console.log(`useExpressServer took ${diff[0]} seconds and ${diff[1]} nanoseconds.`);
 module.exports = app;

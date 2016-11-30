@@ -1,15 +1,17 @@
-#!/usr/bin/env node
+// #!/usr/bin/env node
 /// <reference path='./typings/index.d.ts' />
 
 /**
  * Module dependencies.
  */
 
+let startTime = process.hrtime();
+
 import app = require('./apps/minimum/app');
-import debugModule = require('debug');
+// import debugModule = require('debug');
 import http = require('http');
 
-let debug = debugModule('app:server');
+// let debug = debugModule('app:server');
 
 /**
  * Get port from environment and store in Express.
@@ -89,5 +91,10 @@ function onListening() {
     let bind = typeof addr === 'string'
         ? 'pipe ' + addr
         : 'port ' + addr.port;
-    debug('Listening on ' + bind);
+    // debug('Listening on ' + bind);
+    console.log('Listening on ' + bind);
+
+    let diff = process.hrtime(startTime);
+    console.log(`server listening took ${diff[0]} seconds and ${diff[1]} nanoseconds.`);
+
 }
