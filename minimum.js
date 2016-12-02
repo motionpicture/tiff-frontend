@@ -74,5 +74,5 @@ function onListening() {
     // debug('Listening on ' + bind);
     console.log('Listening on ' + bind);
     let diff = process.hrtime(startTime);
-    console.log(`server listening took ${diff[0]} seconds and ${diff[1]} nanoseconds.`);
+    console.log(`minimum server listening took ${diff[0]} seconds and ${diff[1]} nanoseconds.`);
 }
