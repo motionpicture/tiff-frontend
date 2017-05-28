@@ -17,12 +17,11 @@ node.js application
 [TypeScript](https://www.typescriptlang.org/)
 
 ### 開発方法
-npmでパッケージをインストール。
+[npm](https://www.npmjs.com/)でパッケージをインストール。
 
 ```shell
-npm install
+npm run install:development
 ```
-[npm](https://www.npmjs.com/)
 
 typescriptをjavascriptにコンパイル。
 
@@ -30,13 +29,7 @@ typescriptをjavascriptにコンパイル。
 npm run build -- -w
 ```
 
-npmでローカルサーバーを起動。
-
-```shell
-npm start
-```
-
-[localhost](http://localhost:8080)にアクセス。
+[WebMatrix](https://www.microsoft.com/japan/web/webmatrix/)でローカルサーバーを起動。
 
 
 ### Required environment variables
